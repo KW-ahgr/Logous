@@ -1,0 +1,233 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>External</name>
+    </assembly>
+    <members>
+        <member name="M:External.Controllers.AuthController.GetUsers(System.Nullable{System.Guid},System.String,System.String,System.String,System.String,System.String,System.Nullable{System.Boolean},System.Int32,System.Int32)">
+            <summary>
+            Retrieves a list of users with optional filtering (Admin only)
+            </summary>
+            <param name="uid">Filter by user ID</param>
+            <param name="username">Filter by username (exact match)</param>
+            <param name="email">Filter by email (exact match)</param>
+            <param name="phoneNumber">Filter by phone number (exact match)</param>
+            <param name="details">Filter by details (exact match)</param>
+            <param name="role">Filter by user role (Viewer, Admin, Auditor)</param>
+            <param name="isActive">Filter by active status</param>
+            <param name="page">Page number (default: 1)</param>
+            <param name="pageSize">Items per page (default: 2500)</param>
+            <response code="200">Returns JSON array of users</response>
+            <response code="401">Missing or invalid JWT</response>
+            <response code="403">User is not Admin</response>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:External.Controllers.AuthController.GetPermissions(System.Nullable{System.Guid},System.String,System.Nullable{System.Int32},System.String,System.Int32,System.Int32)" -->
+        <member name="M:External.Controllers.AuthController.Login(External.Models.LoginRequest)">
+            <summary>
+            Authenticates a user and returns access + refresh tokens
+            </summary>
+            <param name="request">Login credentials (Username, Password)</param>
+            <response code="200">Returns access token and expiration time. Sets refresh token as HTTP‑only cookie.</response>
+            <response code="401">Invalid username or password</response>
+        </member>
+        <member name="M:External.Controllers.AuthController.GetHistories(System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Int32,System.Int32)">
+            <summary>
+            Retrieves system history logs (Admin only)
+            </summary>
+            <param name="from">Optional start date filter</param>
+            <param name="to">Optional end date filter</param>
+            <param name="page">Page number (default: 1)</param>
+            <param name="pageSize">Items per page (default: 2500)</param>
+            <response code="200">Returns JSON array of history entries</response>
+            <response code="401">Missing or invalid JWT</response>
+            <response code="403">User is not Admin</response>
+        </member>
+        <member name="M:External.Controllers.AuthController.UpsertUser(External.Models.UpsertUserRequest)">
+            <summary>
+            Creates a new user or updates an existing one (Admin only)
+            </summary>
+            <param name="request">User data (Uid optional for update)</param>
+            <response code="200">Returns operation result as JSON</response>
+            <response code="401">Missing or invalid JWT</response>
+            <response code="403">User is not Admin or trying to change another admin</response>
+        </member>
+        <member name="M:External.Controllers.AuthController.DeleteUser(System.Guid)">
+            <summary>
+            Permanently deletes a user (Admin only)
+            </summary>
+            <param name="uid">User ID to delete</param>
+            <response code="200">Returns deleted user ID</response>
+            <response code="401">Missing or invalid JWT</response>
+            <response code="403">User is not Admin</response>
+        </member>
+        <member name="M:External.Controllers.AuthController.ChangePassword(External.Models.ChangePasswordRequest)">
+            <summary>
+            Changes password for the authenticated user
+            </summary>
+            <param name="request">Old password, new password and username (for salt lookup)</param>
+            <response code="200">Password successfully changed, old refresh tokens invalidated</response>
+            <response code="401">Invalid token, or wrong old password, or user not found</response>
+        </member>
+        <member name="M:External.Controllers.AuthController.Refresh(External.Models.RefreshRequest)">
+            <summary>
+            Refreshes access token using a valid refresh token
+            </summary>
+            <param name="request">User ID (Uid) associated with the refresh token</param>
+            <response code="200">Returns new access token and expiration. Sets new refresh token cookie.</response>
+            <response code="401">Invalid or expired refresh token</response>
+        </member>
+        <member name="M:External.Controllers.AuthController.DeActiveUser(External.Models.DeActiveUserRequest)">
+            <summary>
+            Deactivates a user (sets IsActive = false) and invalidates their refresh tokens (Admin only)
+            </summary>
+            <param name="request">User ID to deactivate</param>
+            <response code="200">User deactivated successfully</response>
+            <response code="401">Missing or invalid JWT</response>
+            <response code="403">User is not Admin</response>
+        </member>
+        <member name="M:External.Controllers.AuthController.AddUserPermission(External.Models.AddPermissionRequest)">
+            <summary>
+            Adds a permission entry to a user (Admin only)
+            </summary>
+            <param name="request">Target user ID, unit type, and either PermId or PermDetails</param>
+            <response code="200">Permission added (or already existed)</response>
+        </member>
+        <member name="M:External.Controllers.AuthController.RemoveUserPermission(System.Guid,System.String,System.Nullable{System.Int32},System.String)">
+            <summary>
+            Removes a specific permission from a user (Admin only)
+            </summary>
+            <param name="uid">Target user ID</param>
+            <param name="unit">Permission unit</param>
+            <param name="permId">Permission ID (for LevelGroup/Level)</param>
+            <param name="permDetails">Permission details (for other unit types)</param>
+            <response code="200">Permission removed if existed</response>
+        </member>
+        <member name="M:External.Controllers.AuthController.ClearOldHistories(System.DateTime)">
+            <summary>
+            Clears old history entries (Admin only)
+            </summary>
+            <param name="from">Delete records older than this date</param>
+            <response code="200">History cleared successfully</response>
+        </member>
+        <member name="M:External.Controllers.AuthController.Logout">
+            <summary>
+            Logs out the current user – invalidates refresh token and clears cookie
+            </summary>
+            <response code="200">Logged out successfully</response>
+            <response code="401">Invalid or missing token</response>
+        </member>
+        <member name="M:External.Controllers.MainController.GetLogs(System.Nullable{System.Int64},System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.Nullable{System.Int32},System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Searches logs with advanced filtering and pagination
+            </summary>
+            <param name="logId">Exact LogId</param>
+            <param name="levelId">Filter by LevelId</param>
+            <param name="groupId">Filter by LevelGroupId</param>
+            <param name="timestampFrom">Start of timestamp range</param>
+            <param name="timestampTo">End of timestamp range</param>
+            <param name="receivedAtFrom">Start of received time range</param>
+            <param name="receivedAtTo">End of received time range</param>
+            <param name="message">Full‑text search in Message</param>
+            <param name="correlationId">Exact CorrelationId</param>
+            <param name="properties">Full‑text search inside PropertiesJson</param>
+            <param name="userDefinition">Full‑text search in UserDefinition</param>
+            <param name="clientIp">Exact client IP</param>
+            <param name="clientPort">Exact client port</param>
+            <param name="requestPath">Full‑text search in RequestPath</param>
+            <param name="protocol">Exact protocol (UDP/TCP/RabbitMQ/Kafka)</param>
+            <param name="sourceId">Filter by SourceId (checks IP/Port permissions)</param>
+            <param name="page">Page number</param>
+            <param name="pageSize">Items per page (max 10000)</param>
+            <param name="withLevels">If true, includes Level and LevelGroup names/colors</param>
+            <response code="200">Returns JSON array of logs (root: 'Logs')</response>
+            <response code="401">Missing or invalid JWT</response>
+        </member>
+        <member name="M:External.Controllers.MainController.GetGroups(System.Nullable{System.Int32},System.String,System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Int32,System.Int32)">
+            <summary>
+            Retrieves LevelGroup list with permission filtering
+            </summary>
+        </member>
+        <member name="M:External.Controllers.MainController.GetLevels(System.Nullable{System.Int32},System.Nullable{System.Int32},System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.String,System.String,System.Int32,System.Int32)">
+            <summary>
+            Retrieves Level list with permission filtering (checks LevelGroup and Level permissions)
+            </summary>
+        </member>
+        <member name="M:External.Controllers.MainController.GetSources(System.Nullable{System.Int32},System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.Nullable{System.Boolean},System.Int32,System.Int32)">
+            <summary>
+            Retrieves Source list with Full‑Text search and IP/Port permission filtering
+            </summary>
+        </member>
+        <member name="M:External.Controllers.MainController.GetUnknownLogs(System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Int32,System.Int32)">
+            <summary>
+            Retrieves logs that have no known Level or no matching Source (unknown origin)
+            </summary>
+        </member>
+        <member name="M:External.Controllers.MainController.CreatePivot(External.Models.PivotRequest)">
+            <summary>
+            Creates a dynamic pivot table for log counts over different time units
+            </summary>
+            <param name="request">Contains Per (reference date), Unit (Hour/Day/Week/Month/Year/All), Which (field to group), Values (comma‑separated)</param>
+            <response code="200">Returns pivot table as JSON</response>
+        </member>
+        <member name="M:External.Controllers.MainController.GetLogsForSequences(System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},System.String,System.String,System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.String,System.String,System.String,System.String,System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
+            <summary>
+            Detects sequences of consecutive logs matching specified criteria (e.g., repeated errors)
+            </summary>
+        </member>
+        <member name="M:External.Controllers.MainController.GetAlternatives(System.Nullable{System.Int32},System.Nullable{System.Int32},System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
+            <summary>
+            Returns alternative log entries and traces of similar logs (uses LAG/LEAD)
+            </summary>
+        </member>
+        <member name="M:External.Controllers.MainController.GetRankings(System.Nullable{System.Boolean},System.Nullable{System.Boolean},System.Nullable{System.Boolean},System.Nullable{System.Boolean},System.Nullable{System.Boolean},System.Nullable{System.Boolean},System.Nullable{System.Boolean},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Int32,System.Int32)">
+            <summary>
+            Ranks logs by count of selected dimensions (Groups, Levels, Sources, etc.)
+            </summary>
+        </member>
+        <member name="M:External.Controllers.MainController.GetDelayedLogs(System.Nullable{System.Int32},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Int32,System.Int32)">
+            <summary>
+            Lists logs whose delivery delay exceeds a threshold (ReceivedAt - Timestamp)
+            </summary>
+        </member>
+        <member name="M:External.Controllers.MainController.GetThingsWithLessLog(System.Nullable{System.Boolean},System.Nullable{System.Boolean},System.Nullable{System.Boolean},System.Nullable{System.Boolean},System.Nullable{System.Boolean},System.Nullable{System.Boolean},System.Nullable{System.Boolean},System.Nullable{System.Int32},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
+            <summary>
+            Returns items (groups, levels, sources, etc.) that have fewer logs than the specified minimum count
+            </summary>
+        </member>
+        <member name="M:External.Controllers.MainController.UpsertGroup(External.Models.UpsertGroupRequest)">
+            <summary>
+            Creates or updates a LevelGroup (Admin only)
+            </summary>
+        </member>
+        <member name="M:External.Controllers.MainController.DeleteGroup(System.Int32)">
+            <summary>
+            Deletes a LevelGroup (Admin only)
+            </summary>
+        </member>
+        <member name="M:External.Controllers.MainController.UpsertLevel(External.Models.UpsertLevelRequest)">
+            <summary>
+            Creates or updates a Level (Admin only)
+            </summary>
+        </member>
+        <member name="M:External.Controllers.MainController.DeleteLevel(System.Int32)">
+            <summary>
+            Deletes a Level (Admin only)
+            </summary>
+        </member>
+        <member name="M:External.Controllers.MainController.UpsertSource(External.Models.UpsertSourceRequest)">
+            <summary>
+            Creates or updates a Source (Admin only)
+            </summary>
+        </member>
+        <member name="M:External.Controllers.MainController.DeleteSource(System.Int32)">
+            <summary>
+            Deletes a Source (Admin only)
+            </summary>
+        </member>
+        <member name="M:External.Controllers.MainController.ClearOldLogs(System.DateTime)">
+            <summary>
+            Deletes logs older than the given date (Admin only)
+            </summary>
+        </member>
+    </members>
+</doc>

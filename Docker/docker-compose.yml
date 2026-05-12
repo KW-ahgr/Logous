@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: logous_sql
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: YourStrong!Password
+      MSSQL_PID: Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "YourStrong!Password", "-Q", "SELECT 1"]
+      interval: 10s
+      retries: 10
+      start_period: 30s
+
+  init-db:
+    image: mcr.microsoft.com/mssql-tools:latest
+    container_name: logous_init
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    volumes:
+      - ../database:/scripts
+    command: >
+      bash -c "
+      /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P YourStrong!Password -i /scripts/LogousDB.sql &&
+      echo 'Database initialized successfully'"
+
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    container_name: logous_api
+    depends_on:
+      init-db:
+        condition: service_completed_successfully
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=LogousDB;User=sa;Password=YourStrong!Password;TrustServerCertificate=true;
+      - Jwt__Key=YourSuperSecretKeyOfAtLeast32Characters!!!
+      - Jwt__Issuer=Logous
+      - Jwt__Audience=LogousClient
+      - Jwt__AccessTokenMinutes=15
+      - Jwt__RefreshTokenDays=7
+    ports:
+      - "5000:80"
+    restart: unless-stopped
+
+  ingestion:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.ingestion
+    container_name: logous_ingestion
+    depends_on:
+      init-db:
+        condition: service_completed_successfully
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=LogousDB;User=sa;Password=YourStrong!Password;TrustServerCertificate=true;
+      - LogIngestion__Udp__Enabled=true
+      - LogIngestion__Udp__Port=514
+      - LogIngestion__Tcp__Enabled=false
+      - LogIngestion__RabbitMq__Enabled=false
+      - LogIngestion__Kafka__Enabled=false
+
+    network_mode: host   
+    restart: unless-stopped
+
+volumes:
+  sql_data:
